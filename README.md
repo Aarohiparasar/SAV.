@@ -20,3 +20,4 @@ The app uses React hooks (useState and useEffect) to manage the state of items, 
 
 3.SEO Optimization:
 Since this is a client-side rendered app, SEO optimization is primarily dependent on the content displayed. The app uses meaningful HTML tags and avoids loading unnecessary data up front, improving performance. Pagination and dynamic content loading also ensure that only relevant data is rendered on the page.
+Deployed Link-https://sav-com.vercel.app/

@@ -6,8 +6,10 @@ import "../App.css";
 const RecaptchaButton = () => {
   const [verified, setVerified] = useState(false);
   const [items, setItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const itemsPerPage = 5;
 
@@ -25,6 +27,7 @@ const RecaptchaButton = () => {
       .get("https://fakestoreapi.com/products")
       .then((res) => {
         setItems(res.data);
+        setFilteredItems(res.data); 
         setLoading(false);
       })
       .catch((error) => {
@@ -33,13 +36,29 @@ const RecaptchaButton = () => {
       });
   };
 
+  // Handle Search Input Change
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Filter items by category dynamically
+    const searchResults = items.filter(
+      (item) => item.category.toLowerCase().startsWith(value.toLowerCase()) // Match from the start of the category
+    );
+    setFilteredItems(searchResults);
+    setCurrentPage(1); // Reset to the first page when searching
+  };
+
   // Paginate items
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedItems = filteredItems.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   // Handle Pagination
   const goToNextPage = () => {
-    if (currentPage < Math.ceil(items.length / itemsPerPage)) {
+    if (currentPage < Math.ceil(filteredItems.length / itemsPerPage)) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -66,6 +85,14 @@ const RecaptchaButton = () => {
           <button className="btn" onClick={loadItems}>
             Load Items
           </button>
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Search by category"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+          </div>
           {loading ? (
             <p>Loading items...</p>
           ) : (
@@ -79,7 +106,7 @@ const RecaptchaButton = () => {
                   </div>
                 ))}
               </div>
-              {items.length > itemsPerPage && (
+              {filteredItems.length > itemsPerPage && (
                 <div className="pagination">
                   <button
                     className="btn"
@@ -93,7 +120,8 @@ const RecaptchaButton = () => {
                     className="btn"
                     onClick={goToNextPage}
                     disabled={
-                      currentPage >= Math.ceil(items.length / itemsPerPage)
+                      currentPage >=
+                      Math.ceil(filteredItems.length / itemsPerPage)
                     }
                   >
                     Next

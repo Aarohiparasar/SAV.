@@ -81,3 +81,18 @@ h1 {
 .pagination span {
   font-size: 1.2rem;
 }
+
+.search-bar {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-bar input {
+  padding: 10px;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+

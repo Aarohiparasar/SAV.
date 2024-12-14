@@ -56,7 +56,7 @@ const RecaptchaButton = () => {
       {!verified && (
         <div className="ReCAPTCHA">
           <ReCAPTCHA
-            sitekey="6LdkeJsqAAAAAPTYoBp7D1Y-aEY7LcH6ZH-kpAyM"
+            sitekey="6LdNnZsqAAAAAJTdcj13qt_GxlFgDUVWfXOsg04q"
             onChange={handleRecaptchaChange}
           />
         </div>

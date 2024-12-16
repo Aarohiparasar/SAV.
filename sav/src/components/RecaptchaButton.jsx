@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import axios from "axios";
 import "../App.css";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const RecaptchaButton = () => {
   const [verified, setVerified] = useState(false);
@@ -27,7 +28,7 @@ const RecaptchaButton = () => {
       .get("https://fakestoreapi.com/products")
       .then((res) => {
         setItems(res.data);
-        setFilteredItems(res.data); 
+        setFilteredItems(res.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -41,12 +42,11 @@ const RecaptchaButton = () => {
     const value = e.target.value;
     setSearchTerm(value);
 
-    // Filter items by category dynamically
-    const searchResults = items.filter(
-      (item) => item.category.toLowerCase().startsWith(value.toLowerCase()) // Match from the start of the category
+    const searchResults = items.filter((item) =>
+      item.category.toLowerCase().startsWith(value.toLowerCase())
     );
     setFilteredItems(searchResults);
-    setCurrentPage(1); // Reset to the first page when searching
+    setCurrentPage(1);
   };
 
   // Paginate items
@@ -69,13 +69,31 @@ const RecaptchaButton = () => {
     }
   };
 
+  // Handle Drag-and-Drop
+  const handleDragEnd = (result) => {
+    const { source, destination } = result;
+
+    // If dropped outside the list or in the same place, do nothing
+    if (!destination || source.index === destination.index) {
+      return;
+    }
+
+    // Rearrange items in the filtered array
+    const reorderedItems = Array.from(filteredItems);
+    const [movedItem] = reorderedItems.splice(source.index, 1);
+    reorderedItems.splice(destination.index, 0, movedItem);
+
+    // Update the state
+    setFilteredItems(reorderedItems);
+  };
+
   return (
     <div className="body">
       <h1>Sav.com</h1>
       {!verified && (
         <div className="ReCAPTCHA">
           <ReCAPTCHA
-            sitekey="6LdNnZsqAAAAAJTdcj13qt_GxlFgDUVWfXOsg04q"
+            sitekey="6LdkeJsqAAAAAPTYoBp7D1Y-aEY7LcH6ZH-kpAyM"
             onChange={handleRecaptchaChange}
           />
         </div>
@@ -97,15 +115,39 @@ const RecaptchaButton = () => {
             <p>Loading items...</p>
           ) : (
             <>
-              <div className="items-grid">
-                {paginatedItems.map((item) => (
-                  <div key={item.id} className="item-card">
-                    <img src={item.image} alt={item.title} />
-                    <h2>{item.title}</h2>
-                    <p>{item.category}</p>
-                  </div>
-                ))}
-              </div>
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="items-grid">
+                  {(provided) => (
+                    <div
+                      className="items-grid"
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                    >
+                      {paginatedItems.map((item, index) => (
+                        <Draggable
+                          key={item.id}
+                          draggableId={item.id.toString()}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              className="item-card"
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <img src={item.image} alt={item.title} />
+                              <h2>{item.title}</h2>
+                              <p>{item.category}</p>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
               {filteredItems.length > itemsPerPage && (
                 <div className="pagination">
                   <button
